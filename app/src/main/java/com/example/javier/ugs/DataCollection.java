@@ -9,33 +9,63 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.widget.TextView;
 
-public class DataCollection extends AppCompatActivity {
+import org.w3c.dom.Text;
+
+public class DataCollection extends AppCompatActivity implements SensorEventListener{
 
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
     }
 
+    private TextView xText, yText, zText;
+    private Sensor UGS_Accelerometer;
+    private SensorManager SManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_collection);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        // Sensor Creation
+        SManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
-        // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        //Accelerometer Sensor
+        UGS_Accelerometer = SManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        //Sensor Listener Registration
+        SManager.registerListener(this, UGS_Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        //Assign Text view
+        xText = (TextView)findViewById(R.id.textView_xText);
+        yText = (TextView) findViewById(R.id.textView_yText);
+        zText = (TextView) findViewById(R.id.textView_zText);
+
+//
+//        // Example of a call to a native method
+//        TextView tv = (TextView) findViewById(R.id.sample_text);
+//        tv.setText(stringFromJNI());
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        xText.setText("X: " + sensorEvent.values[0]);
+        yText.setText("Y: " + sensorEvent.values[1]);
+        zText.setText("Z: " + sensorEvent.values[2]);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+        //Not in use
     }
 
     @Override
